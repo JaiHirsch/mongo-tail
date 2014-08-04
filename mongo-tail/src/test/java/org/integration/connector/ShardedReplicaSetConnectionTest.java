@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.junit.Test;
-import org.mongo.util.SardSetFinder;
+import org.mongo.util.ShardSetFinder;
 
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientOptions;
@@ -44,17 +44,17 @@ public class ShardedReplicaSetConnectionTest {
       try {
          mc = new MongoClient("localhost", 27017);
 
-         SardSetFinder shardFinder = new SardSetFinder();
-         Map<String, List<ServerAddress>> shardSets = shardFinder.findShardSets(mc);
+         ShardSetFinder shardFinder = new ShardSetFinder();
+         Map<String, MongoClient> shardSets = shardFinder.findShardSets(mc);
          mcs = new ArrayList<MongoClient>();
-         
-         for (Entry<String, List<ServerAddress>> host : shardSets.entrySet()) {
+
+         for (Entry<String, MongoClient> host : shardSets.entrySet()) {
             MongoClientOptions opts = new MongoClientOptions.Builder().readPreference(ReadPreference.primary()).build();
-            MongoClient keyClient = new MongoClient(host.getValue(), opts);
+            MongoClient keyClient = host.getValue();
             mcs.add(keyClient);
          }
          Thread.sleep(100);
-         for(MongoClient m : mcs) {
+         for (MongoClient m : mcs) {
             System.out.println(m.getAddress());
          }
       }
