@@ -15,63 +15,49 @@ import com.mongodb.MongoClient;
 
 public class ShardedReplicaTailer {
 
-   // MongoClient mc = null;
-   // List<MongoClient> mcs = null;
-   // try {
-   // mc = new MongoClient("localhost", 27017);
-   //
-   // SardSetFinder shardFinder = new SardSetFinder();
-   // Map<String, List<ServerAddress>> shardSets = shardFinder.findShardSets(mc);
-   // mcs = new ArrayList<MongoClient>();
-   //
-   // for (Entry<String, List<ServerAddress>> host : shardSets.entrySet()) {
-   // MongoClientOptions opts = new MongoClientOptions.Builder().readPreference(ReadPreference.primary()).build();
-   // MongoClient keyClient = new MongoClient(host.getValue(), opts);
-   // mcs.add(keyClient);
-   // }
-   // Thread.sleep(100);
-   // for(MongoClient m : mcs) {
-   // System.out.println(m.getAddress());
-   // }
-   // }
-   // finally {
-   // mc.close();
-   // for (MongoClient m : mcs) {
-   // m.close();
-   // }
-   // }
    private static MongoClient hostMongoS = null;
    private static MongoClient timeClient;
-   private static Map<String, MongoClient> shardSets;
+   private static Map<String, MongoClient> shardSetClients;
+   private static DB timeDB;
 
    public static void main(String[] args) throws UnknownHostException {
 
       try {
          addShutdownHookToMainThread();
-         Properties mongoSInfo = loadProperties();
-         hostMongoS = new MongoClient(mongoSInfo.getProperty("mongosHostInfo"));
-         timeClient = new MongoClient(mongoSInfo.getProperty(("mongoReplTimeHostInfo")));
-         DB timeDB = timeClient.getDB("time_d");
-         ShardSetFinder finder = new ShardSetFinder();
-         shardSets = finder.findShardSets(hostMongoS);
-
-         ExecutorService executor = Executors.newFixedThreadPool(shardSets.size());
-         for (Entry<String, MongoClient> client : shardSets.entrySet()) {
-            Runnable worker = new OplogTail(client, timeDB);
-            executor.execute(worker);
-         }
-         executor.shutdown();
+         establishMongoDBConnections();
+         runTailingThreads();
          while (true)
             ;
       }
       finally {
-         if (hostMongoS != null) hostMongoS.close();
-         if (timeClient != null) timeClient.close();
-         for (MongoClient repClient : shardSets.values()) {
-            repClient.close();
-         }
+         closeMongoConnections();
       }
 
+   }
+
+   private static void establishMongoDBConnections() throws UnknownHostException {
+      Properties mongoConnectionProperties = loadProperties();
+      hostMongoS = new MongoClient(mongoConnectionProperties.getProperty("mongosHostInfo"));
+      timeClient = new MongoClient(mongoConnectionProperties.getProperty(("mongoReplTimeHostInfo")));
+      timeDB = timeClient.getDB("time_d");
+      shardSetClients = new ShardSetFinder().findShardSets(hostMongoS);
+   }
+
+   private static void runTailingThreads() {
+      ExecutorService executor = Executors.newFixedThreadPool(shardSetClients.size());
+      for (Entry<String, MongoClient> client : shardSetClients.entrySet()) {
+         Runnable worker = new OplogTail(client, timeDB);
+         executor.execute(worker);
+      }
+      executor.shutdown();
+   }
+
+   private static void closeMongoConnections() {
+      if (hostMongoS != null) hostMongoS.close();
+      if (timeClient != null) timeClient.close();
+      for (MongoClient repClient : shardSetClients.values()) {
+         repClient.close();
+      }
    }
 
    private static Properties loadProperties() {
@@ -90,8 +76,8 @@ public class ShardedReplicaTailer {
             if (timeClient != null) {
                timeClient.close();
             }
-            if (shardSets != null) {
-               for (MongoClient repClient : shardSets.values()) {
+            if (shardSetClients != null) {
+               for (MongoClient repClient : shardSetClients.values()) {
                   repClient.close();
                }
             }
@@ -102,8 +88,8 @@ public class ShardedReplicaTailer {
                System.out.println("---------------- Unable to join main thread, attempting to shutdown MongoDB connections gracefully. --------------");
                if (hostMongoS != null) hostMongoS.close();
                if (timeClient != null) timeClient.close();
-               if (shardSets != null) {
-                  for (MongoClient repClient : shardSets.values()) {
+               if (shardSetClients != null) {
+                  for (MongoClient repClient : shardSetClients.values()) {
                      repClient.close();
                   }
                }
