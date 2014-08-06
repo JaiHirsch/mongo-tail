@@ -1,7 +1,7 @@
 package org.mongo.util;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.google.common.collect.Iterables;
 import com.mongodb.*;
 
 public class ShardSetFinderTest {

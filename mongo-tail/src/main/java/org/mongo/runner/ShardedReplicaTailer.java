@@ -83,6 +83,7 @@ public class ShardedReplicaTailer {
       final Thread mainThread = Thread.currentThread();
       Runtime.getRuntime().addShutdownHook(new Thread() {
          public void run() {
+            System.out.println("Closing MongoDB connections through shutdown hook");
             if (hostMongoS != null) {
                hostMongoS.close();
             }
