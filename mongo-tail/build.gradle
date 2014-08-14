@@ -16,6 +16,7 @@ dependencies {
    compile (
 
       'org.mongodb:mongo-java-driver:2.12.2',
+	  'com.rabbitmq:amqp-client:3.3.5',
       'commons-lang:commons-lang:2.5',
       'com.google.guava:guava:17.0'
 
