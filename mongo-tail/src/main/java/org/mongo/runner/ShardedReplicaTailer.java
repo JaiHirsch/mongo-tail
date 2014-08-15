@@ -1,6 +1,8 @@
 package org.mongo.runner;
 
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -21,19 +23,17 @@ public class ShardedReplicaTailer {
 	private static MongoClient timeClient;
 	private static Map<String, MongoClient> shardSetClients;
 	private static DB timeDB;
+	private static ExecutorService executor;
 
 	public static void main(String[] args) throws UnknownHostException {
-		String tailType = "";
-		if (args.length > 0) {
-			tailType = args[0];
-		}
 		try {
 			addShutdownHookToMainThread();
 			establishMongoDBConnections();
-			runTailingThreads(tailType);
+			runTailingThreads(args.length > 0 ? args : new String[] { "" });
 			while (true)
 				;
 		} finally {
+			executor.shutdownNow();
 			closeMongoConnections();
 		}
 
@@ -51,18 +51,21 @@ public class ShardedReplicaTailer {
 		shardSetClients = new ShardSetFinder().findShardSets(hostMongoS);
 	}
 
-	private static void runTailingThreads(String tailType) {
-		ExecutorService executor = Executors.newFixedThreadPool(shardSetClients
+	private static void runTailingThreads(String... tailTypes) {
+		System.out.println("Beginning tailalbe mongo using: "
+				+ Arrays.asList(tailTypes));
+		executor = Executors.newFixedThreadPool(shardSetClients
 				.size());
 		for (Entry<String, MongoClient> client : shardSetClients.entrySet()) {
-			Runnable worker = new OplogTail(client, timeDB, getOpType(tailType));
+			Runnable worker = new OplogTail(client, timeDB,
+					getOpType(tailTypes));
 			executor.execute(worker);
 		}
 		executor.shutdown();
 	}
 
-	private static TailType getOpType(String tailType) {
-		return new TailTypeInjector().getTailTypeFromArgs(tailType);
+	private static List<TailType> getOpType(String... tailTypes) {
+		return new TailTypeInjector().getTailTypeFromArgs(tailTypes);
 	}
 
 	private static void closeMongoConnections() {

@@ -1,5 +1,6 @@
 package org.mongo.runner;
 
+import java.util.List;
 import java.util.Map.Entry;
 
 import org.bson.types.BSONTimestamp;
@@ -12,11 +13,11 @@ public class OplogTail implements Runnable {
 	private MongoClient client = null;
 	private BSONTimestamp lastTimeStamp = null;
 	private DBCollection shardTimeCollection = null;
-	private final TailType tailer;
+	private final List<TailType> tailers;
 
 	public OplogTail(Entry<String, MongoClient> client, DB timeDB,
-			TailType tailer) {
-		this.tailer = tailer;
+			List<TailType> tailers) {
+		this.tailers = tailers;
 		this.client = client.getValue();
 		shardTimeCollection = timeDB.getCollection(client.getKey());
 		DBObject findOne = shardTimeCollection.findOne();
@@ -47,10 +48,15 @@ public class OplogTail implements Runnable {
 							new BasicDBObject("$set", new BasicDBObject("ts",
 									lastTimeStamp)), true, true,
 							WriteConcern.SAFE);
-					tailer.tailOp(nextOp);
+					for (TailType tailer : tailers) {
+						tailer.tailOp(nextOp);
+					}
 				}
 			}
 		} finally {
+			for (TailType tailer : tailers) {
+				tailer.close();
+			}
 			System.out.println("good bye");
 		}
 	}
