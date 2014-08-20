@@ -4,7 +4,7 @@ import com.mongodb.DBObject;
 
 public interface TailType {
 
-	public void tailOp(DBObject op);
-	
-	public void close();
+   public void tailOp(DBObject op);
+
+   public void close();
 }

@@ -38,7 +38,8 @@ public class ShardedReplicaSetConnectionTest {
    // }
 
    @Test
-   public void connectToMongoSandGetConnectionInfo() throws UnknownHostException, InterruptedException {
+   public void connectToMongoSandGetConnectionInfo()
+         throws UnknownHostException, InterruptedException {
       MongoClient mc = null;
       List<MongoClient> mcs = null;
       try {
@@ -49,7 +50,8 @@ public class ShardedReplicaSetConnectionTest {
          mcs = new ArrayList<MongoClient>();
 
          for (Entry<String, MongoClient> host : shardSets.entrySet()) {
-            MongoClientOptions opts = new MongoClientOptions.Builder().readPreference(ReadPreference.primary()).build();
+            MongoClientOptions opts = new MongoClientOptions.Builder()
+                  .readPreference(ReadPreference.primary()).build();
             MongoClient keyClient = host.getValue();
             mcs.add(keyClient);
          }
@@ -57,8 +59,7 @@ public class ShardedReplicaSetConnectionTest {
          for (MongoClient m : mcs) {
             System.out.println(m.getAddress());
          }
-      }
-      finally {
+      } finally {
          mc.close();
          for (MongoClient m : mcs) {
             m.close();

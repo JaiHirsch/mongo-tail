@@ -9,12 +9,12 @@ import org.mongo.tail.types.NoopTailType;
 
 public class TailTypeInjectorTest {
 
-	@Test
-	public void testNoopType() {
-		TailTypeInjector inj = new TailTypeInjector();
-		
-		List<TailType> tailTypeFromArgs = inj.getTailTypeFromArgs("NoopTailType");
-		assertTrue(tailTypeFromArgs.get(0) instanceof NoopTailType);
-	}
+   @Test
+   public void testNoopType() {
+      TailTypeInjector inj = new TailTypeInjector();
+
+      List<TailType> tailTypeFromArgs = inj.getTailTypeFromArgs("NoopTailType");
+      assertTrue(tailTypeFromArgs.get(0) instanceof NoopTailType);
+   }
 
 }

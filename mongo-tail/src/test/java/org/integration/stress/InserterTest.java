@@ -20,7 +20,8 @@ public class InserterTest {
       DBCollection collection = mc.getDB("test").getCollection("test_data");
 
       for (int i = 0; i < 500; i++)
-         collection.insert(new BasicDBObject("test_data", RandomStringUtils.randomAlphanumeric(24)));
+         collection.insert(new BasicDBObject("test_data", RandomStringUtils
+               .randomAlphanumeric(24)));
    }
 
 }

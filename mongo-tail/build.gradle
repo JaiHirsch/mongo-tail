@@ -4,6 +4,9 @@ version='0.0.1'
 apply plugin: 'eclipse'
 apply plugin: 'maven'
 apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = 'org.mongo.runner.ShardedReplicaTailer'
 
 sourceCompatibility = 1.7
 targetCompatibility = sourceCompatibility
@@ -31,6 +34,12 @@ dependencies {
 
 test{
     maxHeapSize = "512m"
+}
+
+run {
+	if(project.hasProperty('args')){
+		args project.args.split('\\s')
+	}
 }
 
 task wrapper(type: Wrapper) {
