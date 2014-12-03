@@ -5,11 +5,11 @@ REM  script to start a sharded environment on localhost
 
 echo "del data files for a clean start"
 
-del /Q c:\data\config
-del /Q c:\data\shard0
-del /Q c:\data\shard1
-del /Q c:\data\shard2
-del /Q c:\data\config
+rmdir /s /q c:\data\config
+rmdir /s /q c:\data\shard0
+rmdir /s /q c:\data\shard1
+rmdir /s /q c:\data\shard2
+rmdir /s /q c:\data\time
 
 PING 1.1.1.1 -n 1 -w 5000 >NUL
 
@@ -18,9 +18,9 @@ REM  start a replica set and tell it that it will be a shard0
 mkdir c:\data\shard0\rs0
 mkdir c:\data\shard0\rs1
 mkdir c:\data\shard0\rs2
-start mongod --replSet s0 --dbpath c:\data\shard0\rs0 --port 37017  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s0 --dbpath c:\data\shard0\rs1 --port 37018  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s0 --dbpath c:\data\shard0\rs2 --port 37019  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s0 --logpath "s0-r0.log" --dbpath c:\data\shard0\rs0 --port 37017  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s0 --logpath "s0-r1.log" --dbpath c:\data\shard0\rs1 --port 37018  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s0 --logpath "s0-r2.log" --dbpath c:\data\shard0\rs2 --port 37019  --shardsvr --smallfiles --oplogSize 100
 
 PING 1.1.1.1 -n 1 -w 5000 >NUL
 
@@ -32,9 +32,9 @@ mkdir c:\data\shard1\rs0
 mkdir c:\data\shard1\rs1
 mkdir c:\data\shard1\rs2
 
-start mongod --replSet s1 --dbpath c:\data\shard1\rs0 --port 47017  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s1 --dbpath c:\data\shard1\rs1 --port 47018  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s1 --dbpath c:\data\shard1\rs2 --port 47019  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s1 --logpath "s1-r0.log" --dbpath c:\data\shard1\rs0 --port 47017  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s1 --logpath "s1-r1.log" --dbpath c:\data\shard1\rs1 --port 47018  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s1 --logpath "s1-r2.log" --dbpath c:\data\shard1\rs2 --port 47019  --shardsvr --smallfiles --oplogSize 100
 
 PING 1.1.1.1 -n 1 -w 5000 >NUL
 
@@ -44,9 +44,9 @@ REM  start a replicate set and tell it that it will be a shard2
 mkdir c:\data\shard2\rs0
 mkdir c:\data\shard2\rs1
 mkdir c:\data\shard2\rs2
-start mongod --replSet s2 --dbpath c:\data\shard2\rs0 --port 57017  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s2 --dbpath c:\data\shard2\rs1 --port 57018  --shardsvr --smallfiles --oplogSize 100
-start mongod --replSet s2 --dbpath c:\data\shard2\rs2 --port 57019  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s2 --logpath "s2-r0.log" --dbpath c:\data\shard2\rs0 --port 57017  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s2 --logpath "s2-r1.log" --dbpath c:\data\shard2\rs1 --port 57018  --shardsvr --smallfiles --oplogSize 100
+start mongod --replSet s2 --logpath "s2-r2.log" --dbpath c:\data\shard2\rs2 --port 57019  --shardsvr --smallfiles --oplogSize 100
 
 PING 1.1.1.1 -n 1 -w 5000 >NUL
 
@@ -57,9 +57,9 @@ REM  now start 3 config servers
 mkdir c:\data\config\config-a
 mkdir c:\data\config\config-b
 mkdir c:\data\config\config-c
-start mongod --dbpath c:\data\config\config-a --port 57040 --configsvr --smallfiles --oplogSize 100
-start mongod --dbpath c:\data\config\config-b --port 57041 --configsvr --smallfiles --oplogSize 100
-start mongod --dbpath c:\data\config\config-c --port 57042 --configsvr --smallfiles --oplogSize 100
+start mongod --logpath "cfg-a.log" --dbpath c:\data\config\config-a --port 57040 --configsvr --smallfiles --oplogSize 100
+start mongod --logpath "cfg-b.log" --dbpath c:\data\config\config-b --port 57041 --configsvr --smallfiles --oplogSize 100
+start mongod --logpath "cfg-c.log" --dbpath c:\data\config\config-c --port 57042 --configsvr --smallfiles --oplogSize 100
 
 PING 1.1.1.1 -n 1 -w 5000 >NUL
 
