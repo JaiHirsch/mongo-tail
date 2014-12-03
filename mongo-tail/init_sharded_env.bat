@@ -75,4 +75,7 @@ echo "Connnecting to mongos and enabling sharding"
 REM  add shards and enable sharding on the test db
 start  mongo  --eval "db.adminCommand( { addshard : 's0/'+'localhost:37017' } );db.adminCommand( { addshard : 's1/'+'localhost:47017' } );db.adminCommand( { addshard : 's2/'+'localhost:57017' } );db.adminCommand({enableSharding: 'test'});db.adminCommand({shardCollection: 'test.grades', key: {student_id:1}});"
 
+REM start time server
+mkdir c:\data\time
+start mongod  --logpath "timedb.log" --dbpath c:\data\time --port 27021  --smallfiles --oplogSize 100
 EXIT
